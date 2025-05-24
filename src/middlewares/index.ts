@@ -1,3 +1,8 @@
 
 import apiLogger from "./apiLogger"
-export default {apiLogger}
+import requestCounter from "./requestCounter"
+
+export default {
+    apiLogger,
+    requestCounter
+}
