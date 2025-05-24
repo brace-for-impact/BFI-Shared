@@ -17,11 +17,6 @@ export const logFields: LogField[] = [
     resolver: (_, req) => req.method,
   },
   {
-    key: 'logRequestUrl',
-    label: 'URL',
-    resolver: (_, req) => req.originalUrl,
-  },
-  {
     key: 'logRequestHeaders',
     label: 'Headers',
     resolver: (context, req) => context === 'entry' ? JSON.stringify(req.headers) : null,
@@ -42,5 +37,10 @@ export const logFields: LogField[] = [
     label: 'Response Time',
     resolver: (context, _, res, tokens) =>
       context === 'exit' && tokens ? `${tokens['response-time'](_, res)} ms` : null,
+  },
+  {
+    key: 'logRequestUrl',
+    label: 'URL',
+    resolver: (_, req) => `------${req.originalUrl}`,
   },
 ];

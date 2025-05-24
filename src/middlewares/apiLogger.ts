@@ -9,7 +9,7 @@ const apiLogger = (config: ApiLoggerConfig = {}) => (req: Request, res: Response
     return message ?? '';
   });
   const entryLog = buildLog('entry', config, req, res);
-    if (entryLog) console.log(entryLog + '\n');
+    if (entryLog) console.log(entryLog);
     morganLogger(req, res, next);
 }
 
