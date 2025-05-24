@@ -1,0 +1,19 @@
+# Dev artifacts
+tsconfig.json
+package-lock.json
+*.log
+
+# Source files (you're publishing from dist)
+src/
+*.test.ts
+*.spec.ts
+
+# Editor and environment files
+.vscode/
+.env*
+coverage/
+
+# Optional: if not needed in the final package
+README.md
+.npmignore
+.gitignore

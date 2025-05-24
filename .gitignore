@@ -1,0 +1,26 @@
+# Ignore build output
+dist/
+
+# Ignore dependencies
+node_modules/
+
+# Ignore environment files
+.env*
+.env
+
+# Ignore logs
+*.log
+npm-debug.log*
+
+# Ignore editor & OS files
+.vscode/
+.idea/
+.DS_Store
+
+# Ignore test output & coverage
+coverage/
+*.test.ts
+*.spec.ts
+
+# Ignore system junk
+*.tgz
