@@ -13,6 +13,7 @@
   "license": "MIT",
   "dependencies": {
     "@types/dockerode": "^3.3.39",
+    "axios": "^1.9.0",
     "dockerode": "^4.0.6",
     "express": "^5.1.0",
     "kafkajs": "^2.2.4",
