@@ -5,7 +5,7 @@ export default function errorHandler(
   err: unknown,
   req: Request,
   res: Response,
-  next?: NextFunction
+  next: NextFunction
 ) {
   if (err instanceof AppError) {
     const response: Record<string, any> = {
@@ -30,7 +30,7 @@ export default function errorHandler(
       metadata: (err as any).metadata || null,
     });
 
-    return res.status(err.statusCode).json(response);
+    res.status(err.statusCode).json(response);
   }
 
   console.error("[Unhandled Error]", {
@@ -38,7 +38,7 @@ export default function errorHandler(
     method: req.method,
     error: err,
   });
-  return res
+  res
     .status(500)
     .json({ status: "error", message: "Something went wrong" });
 }
