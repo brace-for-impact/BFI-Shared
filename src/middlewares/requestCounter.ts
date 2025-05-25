@@ -1,4 +1,4 @@
-import express, { NextFunction } from "express"
+import express, { NextFunction, Request, Response } from "express"
 
 let requestCount = 0;
 let requestsPerSecond = 0;
@@ -14,7 +14,6 @@ export default (
   args: {
     config: THasRequestsPerSecond
   },
-  
 ) => (req: Request, res: Response, next: NextFunction) => {
   requestCount++;
   if (!requestCounterInterval) {
