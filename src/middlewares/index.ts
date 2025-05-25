@@ -1,3 +1,4 @@
 
 import apiLogger from "./apiLogger"
-export default {apiLogger}
+import errorHandler from "./errorHandler"
+export default {apiLogger,errorHandler}
