@@ -1,10 +1,10 @@
 
 import apiLogger from "./apiLogger"
-import requestCounter from "./requestCounter"
+import * as requestCounterService from "./requestCounter"
 import errorHandler from "./errorHandler"
 
 export default {
     apiLogger,
-    requestCounter,
+    requestCounterService,
     errorHandler
 }

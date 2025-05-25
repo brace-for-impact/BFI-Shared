@@ -1,29 +1,31 @@
-import express, { NextFunction, Request, Response } from "express"
+// requestCounter.ts
+import { NextFunction, Request, Response } from "express";
 
-let requestCount = 0;
-let requestsPerSecond = 0;
+class RequestCounter {
+  private requestCount = 0;
+  private requestsPerSecond = 0;
 
-type THasRequestsPerSecond = {
-  requestsPerSecond: number; 
-  [key: string]: any; 
-};
-
-let requestCounterInterval: NodeJS.Timeout | null = null;
-
-export default (
-  args: {
-    config: THasRequestsPerSecond
-  },
-) => (req: Request, res: Response, next: NextFunction) => {
-  requestCount++;
-  if (!requestCounterInterval) {
-    requestCounterInterval = setInterval(() => {
-      args.config.requestsPerSecond = requestsPerSecond;
+  constructor() {
+    setInterval(() => {
+      this.requestsPerSecond = this.requestCount;
+      this.requestCount = 0;
     }, 1000);
   }
-  setInterval(() => {
-    requestsPerSecond = requestCount;
-    requestCount = 0;
-  }, 1000);
-  next();
+
+  increment() {
+    this.requestCount++;
+  }
+
+  getRPS() {
+    return this.requestsPerSecond;
+  }
 }
+
+const requestCounter = new RequestCounter();
+
+export const requestCounterMiddleware = (req: Request, res: Response, next: NextFunction) => {
+  requestCounter.increment();
+  next();
+};
+
+export const getRequestsPerSecond = () => requestCounter.getRPS();
