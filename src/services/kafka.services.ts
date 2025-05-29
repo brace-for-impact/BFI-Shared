@@ -7,7 +7,7 @@ let kafkaProducer: Producer | null = null;
 let kafkaConsumer: Consumer | null = null;
 let isConnected = false;
 
-const send = async ({ topic, messages }: { topic: string; messages: Message[] }) => {
+export const send = async ({ topic, messages }: { topic: string; messages: Message[] }) => {
   if (!kafkaProducer) throw new Error('Kafka producer not initialized');
   let attempt = 0;
   while (attempt < MAX_RETRIES) {
@@ -23,7 +23,7 @@ const send = async ({ topic, messages }: { topic: string; messages: Message[] })
   }
 };
 
-const consume = async ({
+export const consume = async ({
   topics,
   onMessage,
 }: {
@@ -89,9 +89,4 @@ export const initKafka = async ({
   });
 
   isConnected = true;
-};
-
-export const kafkaService = {
-  send,
-  consume,
 };
