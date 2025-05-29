@@ -1,58 +1,57 @@
-import { Kafka, Message, Producer, Consumer, EachMessagePayload, KafkaJSConnectionError, KafkaJSProtocolError } from 'kafkajs';
+import { Kafka, Message, Producer, Consumer, EachMessagePayload } from 'kafkajs';
 
 const RETRY_DELAY_MS = 3000;
 const MAX_RETRIES = 5;
 
-const send = (closureArgs: { kafkaProducer: Producer }) => async (
-  args: { topic: string; messages: Message[] }
-) => {
-  const { kafkaProducer } = closureArgs;
-  const { messages, topic } = args;
+let kafkaProducer: Producer | null = null;
+let kafkaConsumer: Consumer | null = null;
+let isConnected = false;
 
+const send = async ({ topic, messages }: { topic: string; messages: Message[] }) => {
+  if (!kafkaProducer) throw new Error('Kafka producer not initialized');
   let attempt = 0;
   while (attempt < MAX_RETRIES) {
     try {
       await kafkaProducer.send({ topic, messages });
-      return; 
+      return;
     } catch (error) {
       attempt++;
-      console.error(`[Kafka Producer] Error sending messages (attempt ${attempt}):`, error);
-      if (attempt >= MAX_RETRIES) {
-        throw error; 
-      }
+      console.error(`[Kafka Producer] Error (attempt ${attempt}):`, error);
+      if (attempt >= MAX_RETRIES) throw error;
       await new Promise(res => setTimeout(res, RETRY_DELAY_MS));
     }
   }
 };
 
-const consume = (closureArgs: { kafkaConsumer: Consumer }) => async (
-  args: {
-    topics: string[];
-    onMessage: (payload: EachMessagePayload) => Promise<void>;
+const consume = async ({
+  topics,
+  onMessage,
+}: {
+  topics: string[];
+  onMessage: (payload: EachMessagePayload) => Promise<void>;
+}) => {
+  const consumer = kafkaConsumer;
+  if (!consumer) {
+    throw new Error('Kafka consumer not initialized');
   }
-) => {
-  const { kafkaConsumer } = closureArgs;
-  const { topics, onMessage } = args;
 
   for (const topic of topics) {
-    await kafkaConsumer.subscribe({ topic, fromBeginning: false });
+    await consumer.subscribe({ topic, fromBeginning: false });
   }
 
   const runConsumer = async () => {
     try {
-      await kafkaConsumer.run({
+      await consumer.run({
         eachMessage: async (payload) => {
           try {
             await onMessage(payload);
           } catch (err) {
-            console.error('[Kafka Consumer] Error processing message:', err);
-            
+            console.error('[Kafka Consumer] Error in message:', err);
           }
         },
       });
     } catch (err) {
-      console.error('[Kafka Consumer] Consumer run error:', err);
-      
+      console.error('[Kafka Consumer] Error running consumer:', err);
       await new Promise(res => setTimeout(res, RETRY_DELAY_MS));
       await runConsumer();
     }
@@ -61,34 +60,38 @@ const consume = (closureArgs: { kafkaConsumer: Consumer }) => async (
   await runConsumer();
 };
 
-export const getKafkaServices = async (args: {
+
+export const initKafka = async ({
+  clientId,
+  brokers,
+  groupId,
+}: {
   clientId: string;
   brokers: string[];
   groupId: string;
 }) => {
-  const { clientId, brokers, groupId } = args;
+  if (isConnected) return; // already initialized
 
   const kafka = new Kafka({ clientId, brokers });
+  kafkaProducer = kafka.producer();
+  kafkaConsumer = kafka.consumer({ groupId });
 
-  const kafkaProducer = kafka.producer();
-  const kafkaConsumer = kafka.consumer({ groupId });
-
-  try {
-    await kafkaProducer.connect();
+  await kafkaProducer.connect().then(() => {
     console.log('[Kafka] ✅ Producer connected');
-  } catch (err) {
+  }).catch((err) => {
     console.error('[Kafka] ❌ Producer connection failed:', err);
-  }
+  });
 
-  try {
-    await kafkaConsumer.connect();
+  await kafkaConsumer.connect().then(() => {
     console.log('[Kafka] ✅ Consumer connected');
-  } catch (err) {
+  }).catch((err) => {
     console.error('[Kafka] ❌ Consumer connection failed:', err);
-  }
+  });
 
-  return {
-    send: send({ kafkaProducer }),
-    consume: consume({ kafkaConsumer }),
-  };
+  isConnected = true;
+};
+
+export const kafkaService = {
+  send,
+  consume,
 };
