@@ -1,7 +1,7 @@
 import Docker from "dockerode";
 import fs from "fs";
 
-export const getContainerServices = (closureArgs: { docker: Docker }) => {
+const getContainerServices = (closureArgs: { docker: Docker }) => {
   return async (args: { networkName: string }) => {
     try {
       const { docker } = closureArgs;
@@ -58,7 +58,7 @@ export const getContainerServices = (closureArgs: { docker: Docker }) => {
   };
 };
 
-export const getContainerInfo = ({ docker }: { docker: Docker }) => {
+const getContainerInfo = ({ docker }: { docker: Docker }) => {
   return async () => {
     const shortId = fs.readFileSync("/etc/hostname", "utf8").trim();
     const containers = await docker.listContainers({ all: true });
